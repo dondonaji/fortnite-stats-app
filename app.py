@@ -33,9 +33,6 @@ if st.button("📲 Consultar"):
     
     try:
         stats = data["data"]["stats"][mode]
-except KeyError:
-    st.error(f"🚫 No hay estadísticas disponibles para el modo: {mode.upper()}")
-    st.stop()
 
 
         # --- MÉTRICAS CLAVE ---
