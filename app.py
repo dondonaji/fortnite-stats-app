@@ -15,24 +15,15 @@ st.markdown("Consulta rápida y visual de estadísticas de jugadores en Fortnite
 
 # --- INPUT DE USUARIO ---
 player = st.text_input("🔎 Ingresa tu nombre de usuario:", value="Tfue")
-platform = st.selectbox("🛡️ Selecciona plataforma:", ["kbm", "gamepad", "touch"])
 mode = st.selectbox("⚔️ Selecciona modo de juego:", ["overall", "solo", "duo", "squad"])
 
-# --- FUNCIÓN DE CONSULTA ---
-@st.cache_data
-def get_stats(player, platform):
-    headers = {"Authorization": API_KEY}
-    url = f"https://fortnite-api.com/v2/stats/br/v2?name={player}&accountType=epic"
-    response = requests.get(url, headers=headers)
-    return response.json()
-
-# --- CARGAR DATOS ---
+# --- CONSULTAR DATOS ---
 if st.button("📲 Consultar"):
     with st.spinner("Consultando datos..."):
-        data = get_stats(player, platform)
+        data = get_stats(player, platform=None)  # No se usa plataforma
 
     try:
-        stats = data["data"]["stats"][mode]
+        stats = data["data"]["stats"]["all"][mode]  # Nueva ruta correcta
     except KeyError:
         st.error(f"🚫 No hay estadísticas disponibles para el modo: {mode.upper()}")
         st.stop()
@@ -52,7 +43,7 @@ if st.button("📲 Consultar"):
         # --- VISUALIZACIÓN ---
         st.markdown("## 🧍 Perfil de Jugador")
         st.markdown(f"**👤 Usuario:** {player}")
-        st.markdown(f"**🎮 Plataforma:** {platform.upper()} | Modo: {mode.upper()}")
+        st.markdown(f"**⚔️ Modo de juego:** {mode.upper()}")
 
         st.markdown("## 📊 Estadísticas Generales")
         col1, col2 = st.columns(2)
