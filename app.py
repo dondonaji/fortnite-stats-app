@@ -32,7 +32,7 @@ if st.button("📲 Consultar"):
         data = get_stats(player, platform)
     
     try:
-    stats = data["data"]["stats"][mode]
+        stats = data["data"]["stats"][mode]
 except KeyError:
     st.error(f"🚫 No hay estadísticas disponibles para el modo: {mode.upper()}")
     st.stop()
