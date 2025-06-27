@@ -1,15 +1,13 @@
 
-
 import streamlit as st
 import requests
 import matplotlib.pyplot as plt
 
 # --- CONFIGURACIÓN INICIAL ---
 st.set_page_config(page_title="Fortnite Stats", layout="centered")
+API_KEY = "264799df-4d52-4a87-8b7f-6ec00be5dc31"  # ← Reemplaza con tu clave de API
 
-API_KEY = "264799df-4d52-4a87-8b7f-6ec00be5dc31"  # ← Reemplaza con tu API key válida
-
-# --- CABECERA DE LA APP ---
+# --- TÍTULO ---
 st.title("🎮 Fortnite Stats Viewer 2.0")
 st.markdown("Consulta rápida y visual de estadísticas de jugadores en Fortnite.")
 
@@ -17,20 +15,22 @@ st.markdown("Consulta rápida y visual de estadísticas de jugadores en Fortnite
 player = st.text_input("🔎 Ingresa tu nombre de usuario:", value="Tfue")
 mode = st.selectbox("⚔️ Selecciona modo de juego:", ["overall", "solo", "duo", "squad"])
 
-# --- CONSULTAR DATOS ---
+# --- CONSULTA A LA API ---
+@st.cache_data
+def get_stats(player):
+    headers = {"Authorization": API_KEY}
+    url = f"https://fortnite-api.com/v2/stats/br/v2?name={player}&accountType=epic"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+# --- CARGAR DATOS Y MOSTRAR ---
 if st.button("📲 Consultar"):
     with st.spinner("Consultando datos..."):
-        data = get_stats(player, platform=None)  # No se usa plataforma
+        data = get_stats(player)
 
     try:
-        stats = data["data"]["stats"]["all"][mode]  # Nueva ruta correcta
-    except KeyError:
-        st.error(f"🚫 No hay estadísticas disponibles para el modo: {mode.upper()}")
-        st.stop()
+        stats = data["data"]["stats"]["all"][mode]
 
-
-
-        # --- MÉTRICAS CLAVE ---
         kills = stats["kills"]
         wins = stats["wins"]
         matches = stats["matches"]
@@ -40,11 +40,12 @@ if st.button("📲 Consultar"):
         score_per_match = stats.get("scorePerMatch", 0)
         kills_per_match = kills / matches if matches else 0
 
-        # --- VISUALIZACIÓN ---
+        # --- INFO GENERAL ---
         st.markdown("## 🧍 Perfil de Jugador")
         st.markdown(f"**👤 Usuario:** {player}")
         st.markdown(f"**⚔️ Modo de juego:** {mode.upper()}")
 
+        # --- MÉTRICAS ---
         st.markdown("## 📊 Estadísticas Generales")
         col1, col2 = st.columns(2)
         col1.metric("🔥 Kills", kills)
@@ -74,6 +75,5 @@ if st.button("📲 Consultar"):
 
         st.success("✅ Consulta completada")
 
-    except Exception as e:
-        st.error("🚫 No se pudieron obtener estadísticas. Verifica que el perfil esté público y el nombre sea correcto.")
-        st.exception(e)
+    except KeyError:
+        st.error(f"🚫 No hay estadísticas disponibles para el modo: {mode.upper()}")
