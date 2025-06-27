@@ -21,6 +21,12 @@ def get_stats(player):
     headers = {"Authorization": API_KEY}
     url = f"https://fortnite-api.com/v2/stats/br/v2?name={player}&accountType=epic"
     response = requests.get(url, headers=headers)
+    
+    if response.status_code != 200:
+        st.error(f"Error al consultar API: {response.status_code}")
+        st.text(response.text)  # Mostrar mensaje detallado
+        return {}
+
     return response.json()
 
 # --- CARGAR DATOS Y MOSTRAR ---
