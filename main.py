@@ -2,31 +2,34 @@
 
 
 import tkinter as tk
-import requests
 import matplotlib.pyplot as plt
+from fortnite_client import FortniteClient
 
-API_KEY = "264799df-4d52-4a87-8b7f-6ec00be5dc31"  # ← pon tu API key real aquí
+# Initialize Client
+client = FortniteClient()
 
 def obtener_stats(username):
-    url = f"https://fortnite-api.com/v2/stats/br/v2?name={username}"
-    headers = {"Authorization": API_KEY}
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()["data"]
-        stats = data["stats"]["all"]["overall"]
-        resultado = (
-            f"Jugador: {data['account']['name']}\n"
-            f"Kills: {stats['kills']}\n"
-            f"Victorias: {stats['wins']}\n"
-            f"Partidas: {stats['matches']}\n"
-            f"K/D: {stats['kd']}\n"
-            f"Win Rate: {stats['winRate']}%\n"
-            f"Minutos jugados: {stats.get('minutesPlayed', 'N/D')}"
-        )
-        return resultado
+    result = client.get_stats(username)
+    
+    if result["status"] == 200:
+        data = result["data"]
+        # Defensive coding in case "stats" or "all" is missing
+        try:
+            stats = data["stats"]["all"]["overall"]
+            resultado = (
+                f"Jugador: {data['account']['name']}\n"
+                f"Kills: {stats['kills']}\n"
+                f"Victorias: {stats['wins']}\n"
+                f"Partidas: {stats['matches']}\n"
+                f"K/D: {stats['kd']}\n"
+                f"Win Rate: {stats['winRate']}%\n"
+                f"Minutos jugados: {stats.get('minutesPlayed', 'N/D')}"
+            )
+            return resultado
+        except KeyError:
+            return "Error: Datos incompletos recibidos de la API."
     else:
-        return ""
+        return f"Error: {result.get('error', 'Desconocido')}"
 
 def buscar():
     nombre = entrada_usuario.get()
@@ -56,7 +59,7 @@ def graficar():
         valores = [kills, wins, matches]
         plt.bar(categorias, valores)
         plt.show()
-    except:
+    except Exception:
         pass
 
 ventana = tk.Tk()
