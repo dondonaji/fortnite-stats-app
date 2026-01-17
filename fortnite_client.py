@@ -54,3 +54,54 @@ class FortniteClient:
                 return {"status": response.status_code, "error": response.text}
         except Exception as e:
             return {"status": 500, "error": str(e)}
+
+    def get_shop(self):
+        """Obtiene la tienda diaria (BR)."""
+        if not self.api_key:
+             return {"status": 401, "error": "API Key not found"}
+
+        headers = {"Authorization": self.api_key}
+        url = f"{self.base_url}/shop/br"
+
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                return {"status": 200, "data": response.json().get("data", {})}
+            else:
+                return {"status": response.status_code, "error": response.text}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+    
+    def get_news(self):
+        """Obtiene las noticias de Battle Royale."""
+        if not self.api_key:
+             return {"status": 401, "error": "API Key not found"}
+
+        headers = {"Authorization": self.api_key}
+        url = "https://fortnite-api.com/v2/news/br"
+
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                return {"status": 200, "data": response.json().get("data", {})}
+            else:
+                return {"status": response.status_code, "error": response.text}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
+
+    def get_map(self):
+        """Obtiene el mapa actual."""
+        if not self.api_key:
+             return {"status": 401, "error": "API Key not found"}
+        
+        headers = {"Authorization": self.api_key}
+        url = "https://fortnite-api.com/v1/map"
+
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                return {"status": 200, "data": response.json().get("data", {})}
+            else:
+                return {"status": response.status_code, "error": response.text}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
