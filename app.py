@@ -124,50 +124,40 @@ def format_time_human(minutes):
 def create_radar_chart(stats):
     import numpy as np
     
-    # --- DATA PREP ---
-    # Normalize values for Radar (0-100 scale logic tailored for Fortnite)
-    # These max values are arbitrary "Pro Level" baselines for normalization
+    # --- DATA PREP (NORMALIZED) ---
     max_kd = 7.0
     max_winrate = 20.0
-    max_top10 = 50.0 # Top 10 Rate %
     max_score_min = 40.0
     max_kills_match = 6.0
     
+    # Solo métricas de habilidad, sacamos supervivencia de aquí
+    labels = ['Combate (K/D)', 'Victoria (Win%)', 'Eficiencia (Sc/Min)', 'Agresividad (K/Match)']
+    
     kd = min(stats.get("kd", 0), max_kd) / max_kd * 100
     win_rate = min(stats.get("winRate", 0), max_winrate) / max_winrate * 100
-    
-    matches = stats.get("matches", 1)
-    top10_rate = (stats.get("top10", 0) / matches * 100) if matches else 0
-    top10_norm = min(top10_rate, max_top10) / max_top10 * 100
-    
     score_min = min(stats.get("scorePerMin", 0), max_score_min) / max_score_min * 100
-    
+    matches = stats.get("matches", 1)
     kills_match = stats.get("kills", 0) / matches if matches else 0
     kills_match_norm = min(kills_match, max_kills_match) / max_kills_match * 100
     
-    # --- PLOT ---
-    labels = ['Combate (K/D)', 'Victoria (Win%)', 'Supervivencia (Top%)', 'Eficiencia (Score/Min)', 'Agresividad (Kills/Match)']
-    values = [kd, win_rate, top10_norm, score_min, kills_match_norm]
+    values = [kd, win_rate, score_min, kills_match_norm]
     
     # Close the loop
     values += values[:1]
     angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False).tolist()
     angles += angles[:1]
     
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
     ax.set_facecolor('#1a1c24')
     fig.patch.set_facecolor('#1a1c24')
     
-    # Draw polygon
     ax.plot(angles, values, color='#bf5af2', linewidth=2, linestyle='solid')
     ax.fill(angles, values, color='#bf5af2', alpha=0.25)
     
-    # Fix labels
     ax.set_yticklabels([])
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(labels, color='white', size=10)
+    ax.set_xticklabels(labels, color='white', size=8)
     
-    # Style grid
     ax.spines['polar'].set_color('#30333d')
     ax.grid(color='#30333d', linestyle='--')
     
@@ -190,84 +180,122 @@ else:
     if not stats:
         st.info(f"🤷‍♂️ No hay datos disponibles para **{player}** en modo **{mode}**.")
     else:
-        # --- DATA EXTRACTION ---
-        kills = stats.get("kills", 0)
-        wins = stats.get("wins", 0)
-        matches = stats.get("matches", 0)
-        kd = stats.get("kd", 0.0)
-        win_rate = stats.get("winRate", 0.0)
+        # --- PREPARE DATA ---
         minutes_played = stats.get("minutesPlayed", 0)
-        score_per_match = stats.get("scorePerMatch", 0)
-        
-        # --- TIME CALCS ---
         human_time = format_time_human(minutes_played)
         hours_only = int(minutes_played / 60)
-        
-        # --- HERO SECTION (PLAYER CARD) ---
         initial = player[0].upper() if player else "?"
         
-        st.markdown(f"""
-        <div class="player-card">
-            <div class="player-header">
-                <div class="player-avatar">{initial}</div>
-                <div>
-                    <h1 style='margin:0; padding:0; font-size: 2.5rem;'>{account.get('name', player)}</h1>
-                    <div style='color: #bf5af2; font-weight: bold;'>Battle Pass Level: {data.get('battlePass', {}).get('level', 'N/A')}</div>
-                </div>
-            </div>
-            <div class="time-stats">
-                <div>
-                    <div style="color: #a0a0a0; font-size: 0.8rem;">DEDICACIÓN TOTAL (HUMANO)</div>
-                    <div style="color: white; font-weight: bold;">⏱ {human_time}</div>
-                </div>
-                <div>
-                    <div style="color: #a0a0a0; font-size: 0.8rem;">HORAS TOTALES</div>
-                    <div style="color: white; font-weight: bold;">⌛ {hours_only:,} horas</div>
-                </div>
-                <div>
-                    <div style="color: #a0a0a0; font-size: 0.8rem;">ÚLTIMA PARTIDA</div>
-                    <div style="color: white; font-weight: bold;">📅 {last_modified}</div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # --- TAB LAYOUT ---
+        tab1, tab2 = st.tabs(["📊 Dashboard Principal", "🧪 Laboratorio / Skins"])
         
-        # --- KPI ROW ---
-        k1, k2, k3, k4 = st.columns(4)
-        k1.metric("Victorias", wins, help="#1 Victory Royales acumuladas")
-        k2.metric("K/D Ratio", f"{kd:.2f}", help="Kills por Muerte (Target > 1.0)")
-        k3.metric("Win Rate", f"{win_rate:.1f}%", help="% de Victorias por partida")
-        k4.metric("Partidas", f"{matches:,}", help="Total de partidas jugadas")
-        
-        st.markdown("---")
-
-        # --- UNIFIED ANALYSIS PANEL ---
-        st.markdown("### 🕸 Radar de Habilidad & Análisis")
-        
-        col_radar, col_analysis = st.columns([1, 1])
-        
-        with col_radar:
-            # PENTAGON CHART
-            try:
-                fig_radar = create_radar_chart(stats)
-                st.pyplot(fig_radar)
-                st.caption("Gráfico de 5 Ejes normalizado para Fornite (Basado en stats Pro).")
-            except Exception as e:
-                st.error(f"Error generando radar: {e}")
-
-        with col_analysis:
+        with tab1:
+             # --- HERO SECTION ---
             st.markdown(f"""
-            #### 🧠 Análisis de Rendimiento
+            <div class="player-card">
+                <div class="player-header">
+                    <div class="player-avatar">{initial}</div>
+                    <div>
+                        <h1 style='margin:0; padding:0; font-size: 2.5rem;'>{account.get('name', player)}</h1>
+                        <div style='color: #bf5af2; font-weight: bold;'>Battle Pass Level: {data.get('battlePass', {}).get('level', 'N/A')}</div>
+                    </div>
+                </div>
+                <div class="time-stats">
+                    <div>
+                        <div style="color: #a0a0a0; font-size: 0.8rem;">DEDICACIÓN (HUMANO)</div>
+                        <div style="color: white; font-weight: bold;">⏱ {human_time}</div>
+                    </div>
+                    <div>
+                        <div style="color: #a0a0a0; font-size: 0.8rem;">HORAS TOTALES</div>
+                        <div style="color: white; font-weight: bold;">⌛ {hours_only:,} h</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
-            Este panel correlaciona tus estadísticas para determinar tu perfil de jugador.
+            # --- KPIS ---
+            k1, k2, k3, k4 = st.columns(4)
+            k1.metric("Victorias", stats.get("wins"), help="#1 Victory Royales")
+            k2.metric("K/D Ratio", f"{stats.get('kd'):.2f}", help="Target Pro: >3.0")
+            k3.metric("Win Rate", f"{stats.get('winRate'):.1f}%", help="% Victorias")
+            k4.metric("Partidas", f"{stats.get('matches'):,}", help="Total Games")
+            st.markdown("---")
             
-            - **Eficiencia de Combate:** Tienes un K/D de **{kd}**.
-              {'🔥 Eres un **Slayer**, buscas la pelea.' if kd > 3.0 else '🛡 Juegas más táctico/defensivo.'}
-              
-            - **Supervivencia:** Ganas el **{win_rate}%** de tus partidas.
-              {'👑 Tienes **Mentalidad de Ganador**, cierras bien los juegos.' if win_rate > 10 else '💡 Enfócate en el posicionamiento final.'}
-              
-            - **Eficiencia de Puntos:** Obtienes **{int(score_per_match)}** puntos por partida promedio.
-            """)
+            # --- CHARTS ROW ---
+            c1, c2 = st.columns([1, 1])
             
-            st.info("💡 **Tip:** Un jugador balanceado mantiene el gráfico de radar lo más amplio y circular posible.")
+            with c1:
+                st.markdown("### 🕸 Radar de Habilidad")
+                st.pyplot(create_radar_chart(stats))
+                
+                # Data Normalizada Explicita
+                st.markdown("#### 📐 Datos del Radar")
+                col_a, col_b = st.columns(2)
+                col_a.metric("Agresividad (Kills/Match)", f"{stats.get('kills')/stats.get('matches'):.1f}")
+                col_b.metric("Eficiencia (Score/Min)", f"{stats.get('scorePerMin'):.1f}")
+            
+            with c2:
+                st.markdown("### 🛡 Embudo de Supervivencia")
+                # Gráfico de Barras Horizontal (Thread/Funnel style)
+                matches = stats.get('matches', 1)
+                top25 = stats.get('top25', 0)
+                top10 = stats.get('top10', 0)
+                wins = stats.get('wins', 0)
+                
+                # Plot
+                fig_bar, ax_bar = plt.subplots(figsize=(5, 3))
+                ax_bar.set_facecolor('#1a1c24')
+                fig_bar.patch.set_facecolor('#1a1c24')
+                
+                y_pos = [0, 1, 2, 3]
+                performance = [matches, top25, top10, wins]
+                labels = ['Total Partidas', 'Top 25', 'Top 10', 'Victorias']
+                colors = ['#30333d', '#bf5af2', '#0a84ff', '#32d74b']
+                
+                ax_bar.barh(y_pos, performance, align='center', color=colors)
+                ax_bar.set_yticks(y_pos)
+                ax_bar.set_yticklabels(labels, color='white')
+                ax_bar.invert_yaxis()  # labels read top-to-bottom
+                ax_bar.tick_params(axis='x', colors='#a0a0a0')
+                ax_bar.spines['top'].set_visible(False)
+                ax_bar.spines['right'].set_visible(False)
+                ax_bar.spines['bottom'].set_color('#30333d')
+                ax_bar.spines['left'].set_visible(False)
+                
+                # Add labels to bars
+                for i, v in enumerate(performance):
+                    ax_bar.text(v + (matches*0.02), i, str(v), color='white', va='center', fontweight='bold')
+
+                st.pyplot(fig_bar)
+
+        with tab2:
+            st.markdown("## 🧪 Laboratorio de Experimentos")
+            st.info("Área de pruebas para nuevas funcionalidades UX y análisis de datos crudos.")
+            
+            st.markdown("### 🎭 Buscador de Skins (Preview)")
+            skin_name = st.text_input("Busca una skin (ej. 'Aura', 'Peely'):")
+            
+            if skin_name:
+                with st.spinner("Buscando en API de Cosméticos..."):
+                    res_cosmetic = client.get_cosmetic(skin_name)
+                    
+                if res_cosmetic["status"] == 200:
+                    item = res_cosmetic["data"]
+                    st.success(f"¡Encontrado! **{item.get('name')}**")
+                    
+                    c_img, c_info = st.columns([1, 2])
+                    with c_img:
+                        img_url = item.get("images", {}).get("icon")
+                        if img_url:
+                            st.image(img_url)
+                    with c_info:
+                        st.write(f"**Descripción:** {item.get('description')}")
+                        st.write(f"**Rareza:** {item.get('rarity', {}).get('displayValue')}")
+                        st.write(f"**Introducción:** {item.get('introduction', {}).get('text')}")
+                else:
+                    st.warning("No se encontró cosmético con ese nombre.")
+            
+            st.markdown("---")
+            st.markdown("### 💾 Inspector de Datos Crudos (JSON)")
+            with st.expander("Ver JSON completo de Stats"):
+                st.json(stats)

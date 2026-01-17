@@ -32,3 +32,25 @@ class FortniteClient:
                 return {"status": response.status_code, "error": response.text}
         except Exception as e:
             return {"status": 500, "error": str(e)}
+
+    def get_cosmetic(self, name):
+        """Busca un cosmético (Skin) por nombre."""
+        if not self.api_key:
+             return {"status": 401, "error": "API Key not found"}
+
+        headers = {"Authorization": self.api_key}
+        url = f"{self.base_url}/cosmetics/br/search"
+        params = {
+            "name": name,
+            "matchMethod": "contains",
+            "language": "es"
+        }
+
+        try:
+            response = requests.get(url, headers=headers, params=params)
+            if response.status_code == 200:
+                return {"status": 200, "data": response.json().get("data", {})}
+            else:
+                return {"status": response.status_code, "error": response.text}
+        except Exception as e:
+            return {"status": 500, "error": str(e)}
