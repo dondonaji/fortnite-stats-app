@@ -7,7 +7,7 @@ def show_dashboard(data, player, mode):
     account = data.get("account", {})
     stats = data.get("stats", {}).get("all", {}).get(mode)
     
-    if notZN stats:
+    if not stats:
         st.info(f"🤷‍♂️ No hay datos disponibles para **{player}** en modo **{mode}**.")
         return
 
