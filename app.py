@@ -84,6 +84,12 @@ if nav == "Dashboard":
             result = client.get_stats(selected_player)
             if result["status"] == 200:
                 show_dashboard(result["data"], selected_player, selected_mode)
+            elif result["status"] == 403:
+                st.warning(f"🔒 **Cuenta Privada**: Las estadísticas de **{selected_player}** no son públicas.")
+                st.info("💡 **Solución:** En Fortnite, ve a *Ajustes > Cuenta y Privacidad > Privacidad de Jugabilidad* y activa **Mostrar en la tabla de clasificación de carrera**.")
+                st.image("https://i.imgur.com/OpF8qj1.png", caption="Cómo activar stats públicas", width=400)
+            elif result["status"] == 404:
+                st.error(f"❌ No se encontró al jugador **{selected_player}**. Verifica que el nombre sea exacto (Epic ID).")
             else:
                 st.error(f"Error {result['status']}: {result.get('error')}")
 
