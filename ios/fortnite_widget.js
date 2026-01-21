@@ -1,12 +1,13 @@
-// Variables used by Scriptable.
-// These must be at the very top of the file. Do not edit.
-// icon-color: purple; icon-glyph: gamepad;
+// Variables
+const API_KEY = "264799df-4d52-4a87-8b7f-6ec00be5dc31";
+let USER = "Ninja"; // Default config
 
-// --- CONFIGURATION ---
-const API_KEY = "264799df-4d52-4a87-8b7f-6ec00be5dc31"; // Tu API Key
-const USERNAME = "Tfue"; // Jugador por defecto
+// 1. Get Widget Parameter (User input)
+if (args.widgetParameter) {
+    USER = args.widgetParameter;
+}
 
-// --- MAIN LOGIC ---
+// 2. Run Widget
 if (config.runsInWidget) {
     const widget = await createWidget();
     Script.setWidget(widget);
@@ -16,87 +17,119 @@ if (config.runsInWidget) {
 }
 Script.complete();
 
+// 3. UI Construction
 async function createWidget() {
-    const data = await fetchStats(USERNAME);
+    const data = await fetchStats(USER);
     const widget = new ListWidget();
 
-    // Background Color (Dark Theme)
-    widget.backgroundColor = new Color("#1a1c24");
+    // Background Gradient (Gamer Vibes)
+    let gradient = new LinearGradient();
+    gradient.locations = [0, 1];
+    gradient.colors = [
+        new Color("#0f1014"),
+        new Color("#1a1c24")
+    ];
+    widget.backgroundGradient = gradient;
 
-    if (!data) {
-        const errText = widget.addText("Error loading stats");
-        errText.textColor = Color.red();
+    if (!data || data.error) {
+        showError(widget, data ? data.error : "Usuario no encontrado");
         return widget;
     }
 
-    const stats = data.stats.all.overall;
+    const { account, battlePass, stats } = data;
+    const overall = stats.all.overall;
 
-    // --- HEADER ---
-    const titleStack = widget.addStack();
-    titleStack.layoutHorizontally();
+    // --- Layout ---
+    let mainStack = widget.addStack();
+    mainStack.layoutHorizontally();
 
-    const icon = titleStack.addText("🎮");
-    icon.font = Font.largeTitle();
+    // Left Column: Avatar & Name
+    let leftCol = mainStack.addStack();
+    leftCol.layoutVertically();
+    leftCol.centerAlignContent();
 
-    titleStack.addSpacer(8);
+    // Avatar Circle (simulated with text for now, could be image)
+    let avatarStack = leftCol.addStack();
+    avatarStack.size = new Size(50, 50);
+    avatarStack.backgroundColor = new Color("#bf5af2");
+    avatarStack.cornerRadius = 25;
+    avatarStack.centerAlignContent();
+    let avatarTxt = avatarStack.addText(account.name.charAt(0).toUpperCase());
+    avatarTxt.font = Font.heavySystemFont(24);
+    avatarTxt.textColor = Color.white();
 
-    const userStack = titleStack.addStack();
-    userStack.layoutVertically();
+    leftCol.addSpacer(8);
 
-    const userText = userStack.addText(data.account.name);
-    userText.font = Font.boldSystemFont(16);
-    userText.textColor = Color.white();
+    let nameTxt = leftCol.addText(account.name);
+    nameTxt.font = Font.boldSystemFont(14);
+    nameTxt.textColor = Color.white();
+    nameTxt.lineLimit = 1;
 
-    const subText = userStack.addText("Lifetime Stats");
-    subText.font = Font.systemFont(10);
-    subText.textColor = new Color("#a0a0a0");
+    let levelTxt = leftCol.addText(`Lvl ${battlePass.level}`);
+    levelTxt.font = Font.systemFont(10);
+    levelTxt.textColor = new Color("#a0a0a0");
 
-    widget.addSpacer(12);
+    mainStack.addSpacer(); // Spacer between columns
 
-    // --- STATS ROW 1 ---
-    const row1 = widget.addStack();
-    row1.layoutHorizontally();
-    addStat(row1, "WINS", stats.wins, "#32d74b");
-    row1.addSpacer();
-    addStat(row1, "K/D", stats.kd.toFixed(2), "#ff9f0a");
+    // Right Column: Stats Grid
+    let rightCol = mainStack.addStack();
+    rightCol.layoutVertically();
+    rightCol.spacing = 6;
 
-    widget.addSpacer(8);
-
-    // --- STATS ROW 2 ---
-    const row2 = widget.addStack();
-    row2.layoutHorizontally();
-    addStat(row2, "MATCHES", stats.matches, "#0a84ff");
-    row2.addSpacer();
-    addStat(row2, "WIN %", stats.winRate.toFixed(1) + "%", "#bf5af2");
+    // Row 1: Wins
+    addStatRow(rightCol, "VICTORIAS", overall.wins, "👑", "#32d74b");
+    // Row 2: K/D
+    addStatRow(rightCol, "K/D RATIO", overall.kd.toFixed(2), "🎯", "#ff9f0a");
+    // Row 3: Win Rate
+    addStatRow(rightCol, "WIN RATE", overall.winRate.toFixed(1) + "%", "📈", "#0a84ff");
 
     return widget;
 }
 
-function addStat(stack, label, value, colorHex) {
-    const vStack = stack.addStack();
-    vStack.layoutVertically();
+function addStatRow(stack, label, value, icon, colorHex) {
+    let row = stack.addStack();
+    row.layoutHorizontally();
+    row.centerAlignContent();
+    row.backgroundColor = new Color("#ffffff", 0.05);
+    row.cornerRadius = 8;
+    row.setPadding(4, 8, 4, 8);
 
-    const lbl = vStack.addText(label);
-    lbl.font = Font.systemFont(8);
-    lbl.textColor = new Color("#a0a0a0");
+    let iconTxt = row.addText(icon);
+    iconTxt.font = Font.systemFont(12);
+    row.addSpacer(6);
 
-    const val = vStack.addText(`${value}`);
-    val.font = Font.heavySystemFont(18);
-    val.textColor = new Color(colorHex);
+    let valTxt = row.addText(`${value}`);
+    valTxt.font = Font.boldSystemFont(14);
+    valTxt.textColor = new Color(colorHex);
+
+    row.addSpacer(4);
+
+    let lblTxt = row.addText(label);
+    lblTxt.font = Font.systemFont(8);
+    lblTxt.textColor = new Color("#888888");
 }
 
-async function fetchStats(player) {
-    const url = `https://fortnite-api.com/v2/stats/br/v2?name=${player}&accountType=epic`;
-    const req = new Request(url);
-    req.headers = { "Authorization": API_KEY };
+function showError(widget, msg) {
+    let t = widget.addText("⚠️ Error");
+    t.textColor = Color.red();
+    widget.addSpacer(5);
+    let m = widget.addText(msg);
+    m.font = Font.systemFont(10);
+    m.textColor = Color.white();
+}
 
+// 4. API Fetching
+async function fetchStats(user) {
+    // !IMPORTANT: Using the direct API for speed, avoiding proxy latency for widgets
+    // In production, you might point this to your Vercel API /api/stats
+    let url = `https://fortnite-api.com/v2/stats/br/v2?name=${user}&accountType=epic`;
+    let req = new Request(url);
+    req.headers = { "Authorization": API_KEY };
     try {
-        const json = await req.loadJSON();
-        if (json.status === 200) {
-            return json.data;
-        }
-        return null;
+        let json = await req.loadJSON();
+        if (json.status === 200) return json.data;
+        return { error: json.error || "Datos no disponibles" };
     } catch (e) {
-        return null;
+        return { error: "Sin conexión" };
     }
 }
