@@ -4,35 +4,28 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    /* Neon Purple Primary */
+    /* Neon Purple - Fortnite Vibe */
     --primary: 278 83% 63%;
     --primary-foreground: 0 0% 100%;
 
-    /* Neon Green Secondary */
-    --secondary: 130 63% 52%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 278 83% 63%;  /* Reusing Primary for Accent density */
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 278 83% 63%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 278 83% 63%; /* Neon Focus Ring */
 
     --radius: 0.75rem;
   }
@@ -42,97 +35,34 @@
   * {
     border-color: hsl(var(--border));
   }
-
   body {
+    @apply bg-background text-foreground;
+    /* Dynamic Storm/Space Background */
     background-color: #050505;
-    /* Deep luxury black */
-    color: #ffffff;
-    /* Subtle Luxury Ambient Light */
-    background-image:
-      radial-gradient(circle at 50% -20%, rgba(120, 119, 198, 0.1) 0%, transparent 40%),
-      radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 30%);
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(278, 83%, 63%, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(200, 100%, 50%, 0.15) 0px, transparent 50%),
+        url("https://media.fortniteapi.io/images/map.png"); /* Placeholder for texture, will be dimmed */
+    background-blend-mode: screen, screen, overlay;
     background-attachment: fixed;
-    font-family: var(--font-inter), sans-serif;
+    background-size: cover, cover, cover;
   }
 }
 
-/* Typography - Luxury Dynamic Weights */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-inter), sans-serif;
-  letter-spacing: -0.02em;
-  /* Tight tracking for modern look */
-  font-weight: 600;
+/* Typography Overrides */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-black tracking-tight uppercase;
+  text-shadow: 0 0 20px rgba(191, 90, 242, 0.5); /* Neon Glow on Text */
 }
 
-/* Utilities */
-/* Utilities */
-/* Luxury Utilities */
-.glass-panel {
-  background-color: rgba(10, 10, 10, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+/* Gaming Card Utility */
+.gaming-card {
+  @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 20px rgba(0,0,0,0.5);
+  transition: all 0.2s ease;
 }
 
-.glass-card {
-  background-color: rgba(20, 20, 20, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  transition: all 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.glass-card:hover {
-  background-color: rgba(30, 30, 30, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.3);
-}
-
-.text-glow {
-  /* Subtle luxurious glow, not neon */
-  text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-}
-
-/* Animation Utilities */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.loader {
-  animation: spin 3s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
+.gaming-card:hover {
+    @apply border-[#bf5af2]/50 bg-black/60;
+    box-shadow: 0 0 30px rgba(191, 90, 242, 0.2);
 }

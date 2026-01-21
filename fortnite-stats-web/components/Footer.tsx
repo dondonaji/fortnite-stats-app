@@ -21,7 +21,7 @@ export function Footer() {
     }, []);
 
     return (
-        <footer className="fixed bottom-0 left-0 w-full py-4 border-t border-white/5 bg-black/90 backdrop-blur-xl z-[100]">
+        <footer className="w-full py-4 border-t border-white/5 bg-black/90 backdrop-blur-xl z-[100]">
             <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-center text-[10px] text-white/30 uppercase tracking-widest font-mono gap-4">
 
                 {/* Left: Branding & Status */}
