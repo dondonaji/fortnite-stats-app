@@ -30,7 +30,7 @@ export function Footer() {
                 {/* Left */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontWeight: 600, color: '#d4d4d8' }}>FN Stats Pro</span>
-                    <span style={{ background: '#7c3aed', color: 'white', fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 500 }}>BETA</span>
+                    <span style={{ background: '#7c3aed', color: 'white', fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 500 }}>BETA v1.1</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} />
                         <span style={{ color: '#22c55e' }}>Online</span>
