@@ -1,97 +1,65 @@
 {
-    "status": 200,
-    "data": {
-        "account": {
-            "id": "4735ce9132924caf8a5b17789b40f79c",
-            "name": "Ninja"
-        },
-        "battlePass": {
-            "level": 150,
-            "progress": 45
-        },
-        "image": "https://fortnite-api.com/images/cosmetics/br/cid_028_athena_commando_f/icon.png",
-        "stats": {
-            "all": {
-                "overall": {
-                    "score": 459032,
-                    "scorePerMin": 22.5,
-                    "scorePerMatch": 340,
-                    "wins": 500,
-                    "top3": 120,
-                    "top5": 300,
-                    "top6": 40,
-                    "top10": 800,
-                    "top12": 150,
-                    "top25": 1200,
-                    "kills": 15000,
-                    "killsPerMin": 4.5,
-                    "killsPerMatch": 5.2,
-                    "deaths": 2500,
-                    "kd": 6.0,
-                    "matches": 3000,
-                    "winRate": 16.6,
-                    "minutesPlayed": 45000,
-                    "playersOutlived": 90000,
-                    "lastModified": "2024-01-01T12:00:00Z"
-                },
-                "solo": {
-                    "score": 120000,
-                    "scorePerMin": 18.5,
-                    "scorePerMatch": 300,
-                    "wins": 100,
-                    "top10": 200,
-                    "top25": 400,
-                    "kills": 4000,
-                    "killsPerMin": 3.5,
-                    "killsPerMatch": 4.5,
-                    "deaths": 800,
-                    "kd": 5.0,
-                    "matches": 900,
-                    "winRate": 11.1,
-                    "minutesPlayed": 12000,
-                    "playersOutlived": 30000,
-                    "lastModified": "2024-01-01T12:00:00Z"
-                },
-                "duo": {
-                    "score": 150000,
-                    "scorePerMin": 20.0,
-                    "scorePerMatch": 320,
-                    "wins": 150,
-                    "top5": 200,
-                    "top12": 400,
-                    "kills": 5000,
-                    "killsPerMin": 4.0,
-                    "killsPerMatch": 4.8,
-                    "deaths": 800,
-                    "kd": 6.25,
-                    "matches": 1000,
-                    "winRate": 15.0,
-                    "minutesPlayed": 15000,
-                    "playersOutlived": 35000,
-                    "lastModified": "2024-01-01T12:00:00Z"
-                },
-                "squad": {
-                    "score": 189032,
-                    "scorePerMin": 25.0,
-                    "scorePerMatch": 380,
-                    "wins": 250,
-                    "top3": 120,
-                    "top6": 400,
-                    "kills": 6000,
-                    "killsPerMin": 5.0,
-                    "killsPerMatch": 5.5,
-                    "deaths": 900,
-                    "kd": 6.66,
-                    "matches": 1100,
-                    "winRate": 22.7,
-                    "minutesPlayed": 18000,
-                    "playersOutlived": 25000,
-                    "lastModified": "2024-01-01T12:00:00Z"
-                }
+    "apiEndpoint": "https://fortnite-api.com/v2/stats/br/v2",
+    "queryParams": {
+        "name": "string (required) - Epic Games username",
+        "accountType": "string (optional) - epic | psn | xbl (default: epic)",
+        "timeWindow": "string (optional) - season | lifetime (default: lifetime)"
+    },
+    "headers": {
+        "Authorization": "string (required) - API Key"
+    },
+    "exampleResponse": {
+        "status": 200,
+        "data": {
+            "account": {
+                "id": "d5f0d9ba072a4fbd9",
+                "name": "Tfue"
             },
-            "keyboardMouse": null,
-            "gamepad": null,
-            "touch": null
+            "battlePass": {
+                "level": 200,
+                "progress": 0
+            },
+            "image": "https://fortnite-api.com/images/cosmetics/br/cid_xxx/icon.png",
+            "stats": {
+                "all": {
+                    "overall": {
+                        "score": 1500000,
+                        "scorePerMin": 25.5,
+                        "scorePerMatch": 450,
+                        "wins": 4248,
+                        "top3": 500,
+                        "top5": 800,
+                        "top10": 1500,
+                        "top25": 2000,
+                        "kills": 85000,
+                        "kd": 5.21,
+                        "matches": 16000,
+                        "winRate": 26.5,
+                        "minutesPlayed": 180000,
+                        "lastModified": "2024-11-02T16:34:39Z"
+                    },
+                    "solo": "...same structure as overall...",
+                    "duo": "...same structure as overall...",
+                    "squad": "...same structure as overall...",
+                    "ltm": "...same structure as overall..."
+                },
+                "keyboardMouse": "...same structure as all...",
+                "gamepad": "...same structure as all...",
+                "touch": null
+            }
         }
-    }
+    },
+    "errorResponses": {
+        "400": "Missing required parameter",
+        "403": "Private profile or Player Not Found",
+        "404": "Account not found",
+        "429": "Rate limit exceeded",
+        "500": "Internal server error"
+    },
+    "notes": [
+        "Stats are cumulative (lifetime) unless timeWindow=season",
+        "Some fields may be null if player has private profile",
+        "Competitive/Ranked data NOT available via this endpoint",
+        "History is injected by our backend from Supabase snapshots"
+    ]
 }

@@ -80,7 +80,7 @@ export function SkillRadar({ stats }: SkillRadarProps) {
                 {showLabels ? <Eye size={12} /> : <EyeOff size={12} />}
             </button>
 
-            <div className="flex-1 w-full h-[300px]">
+            <div className="flex-1 w-full h-[300px] min-h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
                         <PolarGrid stroke="#30333d" strokeDasharray="3 3" />

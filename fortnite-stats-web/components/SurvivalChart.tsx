@@ -26,7 +26,7 @@ export function SurvivalChart({ stats }: SurvivalChartProps) {
     ];
 
     return (
-        <div className="w-full h-full min-h-0">
+        <div className="w-full h-full min-h-[150px]">
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>

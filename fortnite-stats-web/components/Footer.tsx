@@ -6,57 +6,49 @@ export function Footer() {
     const [visits, setVisits] = useState<number | null>(null);
 
     useEffect(() => {
-        // Simple fetch to increment and get visits
-        console.log('Fetching visit count...');
         fetch('/api/visits')
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                console.log('Visit data received:', data);
-                setVisits(data.count);
-            })
-            .catch(err => console.error('Visit count failed', err));
+            .then(res => res.ok ? res.json() : null)
+            .then(data => data && setVisits(data.count))
+            .catch(() => { });
     }, []);
 
     return (
-        <footer className="w-full py-4 border-t border-white/5 bg-black/90 backdrop-blur-xl z-[100]">
-            <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-center text-[10px] text-white/30 uppercase tracking-widest font-mono gap-4">
-
-                {/* Left: Branding & Status */}
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                        <span className="text-white">FN.STATS PRO</span>
-                        <span className="px-1.5 py-0.5 rounded bg-[#bf5af2]/10 text-[#bf5af2] text-[9px] font-bold border border-[#bf5af2]/20">BETA v1.2</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </div>
-                        <span className="text-green-500/80 font-bold">SYSTEM ONLINE</span>
-                    </div>
-                </div>
-
-                {/* Center: Stats */}
-                <div className="flex items-center gap-4">
-                    <div className="px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-lg">
-                        <span className="text-white font-bold tabular-nums">
-                            {visits !== null ? visits.toLocaleString() : "..."}
-                        </span>
-                        <span className="ml-2 text-[9px] text-white/40 font-bold tracking-widest">VISITS</span>
+        <footer style={{
+            padding: '1rem 1.5rem',
+            background: '#09090b',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+        }}>
+            <div style={{
+                maxWidth: 1152,
+                margin: '0 auto',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: 11,
+                color: '#71717a'
+            }}>
+                {/* Left */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontWeight: 600, color: '#d4d4d8' }}>FN Stats Pro</span>
+                    <span style={{ background: '#7c3aed', color: 'white', fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 500 }}>BETA</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} />
+                        <span style={{ color: '#22c55e' }}>Online</span>
                     </div>
                 </div>
 
-                {/* Right: Legal & Credits */}
-                <div className="flex flex-col items-start md:items-end gap-1 text-right">
-                    <p className="hover:text-white/50 transition-colors">
-                        DESIGNED BY <span className="text-white font-bold">DON</span>
-                    </p>
-                    <p className="max-w-xs text-[9px] leading-relaxed opacity-50">
-                        Not affiliated with Epic Games, Inc. Fortnite is a trademark of Epic Games.
-                    </p>
+                {/* Center */}
+                {visits !== null && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontWeight: 600, color: '#d4d4d8', fontVariantNumeric: 'tabular-nums' }}>{visits.toLocaleString()}</span>
+                        <span>visitas</span>
+                    </div>
+                )}
+
+                {/* Right */}
+                <div style={{ textAlign: 'right' }}>
+                    <span>Diseñado por </span>
+                    <span style={{ color: '#d4d4d8', fontWeight: 500 }}>Don</span>
                 </div>
             </div>
         </footer>

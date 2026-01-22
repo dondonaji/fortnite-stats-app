@@ -4,30 +4,38 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
+    /* Core Colors - Clean Dark Theme */
+    --background: 240 10% 4%;
     --foreground: 0 0% 98%;
 
-    /* Neon Purple - Fortnite Vibe */
-    --primary: 278 83% 63%;
+    /* Primary - Purple Accent */
+    --primary: 270 70% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    /* Secondary - Muted Dark */
+    --secondary: 240 5% 12%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 240 5% 18%;
+    --muted-foreground: 240 5% 55%;
 
-    --accent: 278 83% 63%;  /* Reusing Primary for Accent density */
+    --accent: 270 70% 60%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 278 83% 63%; /* Neon Focus Ring */
 
-    --radius: 0.75rem;
+    --border: 240 5% 18%;
+    --input: 240 5% 15%;
+    --ring: 270 70% 60%;
+
+    --radius: 1rem;
+
+    /* SYSTEM TOKENS */
+    --ag-border: rgba(255, 255, 255, 0.06);
+    --ag-border-hover: rgba(255, 255, 255, 0.15);
+    --ag-glass: rgba(15, 15, 20, 0.6);
+    --ag-glass-hover: rgba(20, 20, 28, 0.7);
   }
 }
 
@@ -35,34 +43,122 @@
   * {
     border-color: hsl(var(--border));
   }
+
   body {
-    @apply bg-background text-foreground;
-    /* Dynamic Storm/Space Background */
-    background-color: #050505;
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(278, 83%, 63%, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, hsla(200, 100%, 50%, 0.15) 0px, transparent 50%),
-        url("https://media.fortniteapi.io/images/map.png"); /* Placeholder for texture, will be dimmed */
-    background-blend-mode: screen, screen, overlay;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "ss01", "ss02";
+    /* Clean Gradient Background */
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 80, 200, 0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(80, 120, 200, 0.1), transparent);
     background-attachment: fixed;
-    background-size: cover, cover, cover;
   }
 }
 
-/* Typography Overrides */
-h1, h2, h3, h4, h5, h6 {
-  @apply font-black tracking-tight uppercase;
-  text-shadow: 0 0 20px rgba(191, 90, 242, 0.5); /* Neon Glow on Text */
+/* ═══════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY - Clean Stats Dashboard
+═══════════════════════════════════════════════════════════════════════════ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
-/* Gaming Card Utility */
-.gaming-card {
-  @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 20px rgba(0,0,0,0.5);
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD COMPONENTS
+═══════════════════════════════════════════════════════════════════════════ */
+.antigravity-card {
+  background-color: var(--ag-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--ag-border);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition: all 0.2s ease;
 }
 
-.gaming-card:hover {
-    @apply border-[#bf5af2]/50 bg-black/60;
-    box-shadow: 0 0 30px rgba(191, 90, 242, 0.2);
+.antigravity-card:hover {
+  background-color: var(--ag-glass-hover);
+  border-color: var(--ag-border-hover);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* KPI Card - Specific styling for stat cards */
+.kpi-card {
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--ag-border);
+  border-radius: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ag-border-hover);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+═══════════════════════════════════════════════════════════════════════════ */
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* Progress bar base */
+.progress-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR (Optional - Refined)
+═══════════════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

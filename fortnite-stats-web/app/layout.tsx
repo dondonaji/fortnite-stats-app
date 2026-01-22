@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google"; // Luxury Sans
+import { Geist } from "next/font/google";
 import "./globals.css";
 
 import { DevModeBadge } from "@/components/DevModeBadge";
-import { Footer } from "@/components/Footer";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
 export const metadata: Metadata = {
   title: {
@@ -27,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_ES",
-    url: "https://fortnite-stats-pro.vercel.app", // Fallback URL
+    url: "https://fortnite-stats-pro.vercel.app",
     title: "Fortnite Stats Pro | Elite Dashboard",
     description: "Analyze your performance with pro-level visuals. Track wins, K/D, and survival trends.",
     siteName: "Fortnite Stats Pro",
@@ -40,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050505", // Updated to Luxury Black
+  themeColor: "#050505",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -52,15 +51,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
+    <html lang="es">
+      <body className={`${geist.variable} font-sans antialiased`}>
         <DevModeBadge />
-        <div className="flex flex-col min-h-screen">
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        {children}
       </body>
     </html>
   );

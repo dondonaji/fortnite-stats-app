@@ -1,40 +1,50 @@
-# Sistema de Diseño y Arte (FSP LUXURY)
+# Sistema de Diseño - FN Stats Pro
 
-## 1. Filosofía Estética: "Modern Luxury"
-El objetivo es alejar el diseño del estereotipo "Gamer Neon 80s" y acercarlo a una estética de "Fintech de Alto Rendimiento" o "Dashboard Deportivo Premium".
-*   **Keywords:** Sobriedad, Profundidad, Precisión, Eteridad.
+## Tipografía
+- **Font**: Geist (Google Fonts)
+- **Títulos**: 700 weight, -0.02em tracking
+- **Labels**: 500 weight, uppercase, 0.05em tracking, 9-10px
 
-## 2. Fundamentos Visuales
+## Border Radius (Gaming Aesthetic)
+| Elemento | Valor |
+|----------|-------|
+| Cards    | 10px  |
+| Inputs/Buttons | 6px |
+| Badges   | 4px   |
 
-### Color (Paleta "Deep Dark")
-No usamos negro puro (`#000`), sino tonos profundos para dar riqueza.
-| Token | Valor Hex | Uso |
-| :--- | :--- | :--- |
-| `Background` | `#050505` | Fondo principal (casi negro). |
-| `Card Base` | `rgba(20, 20, 20, 0.4)` | Base de tarjetas (Glass). |
-| `Panel Base` | `rgba(10, 10, 10, 0.6)` | Paneles estructurales. |
-| `Text Primary` | `#FFFFFF` | Títulos y datos clave. |
-| `Text Muted` | `rgba(255, 255, 255, 0.4)` | Etiquetas y metadatos. |
-| `Accent` | `#bf5af2` (Purple) | Solo para detalles muy específicos de identidad. |
+## Colores
+- **Background**: #09090b (zinc-950)
+- **Cards**: rgba(255,255,255,0.025)
+- **Borders**: rgba(255,255,255,0.06)
+- **Accent**: #7c3aed (purple-600)
+- **Success**: #22c55e
+- **Text Primary**: #d4d4d8
+- **Text Muted**: #71717a
 
-### Tipografía (Dynamic Sans)
-Usamos **Inter** (o Geist) aprovechando sus "Variable Weights".
-*   **H1 (Logo):** `font-black`, `tracking-tighter`.
-*   **Números (KPIs):** `font-light` en reposo -> `font-medium` en hover. Esto crea una sensación orgánica de "vida".
-*   **Etiquetas:** `uppercase`, `tracking-widest` (espaciado generoso) para elegancia.
+## Layout (Dashboard)
+```
+┌─────────────────────────────────────────────────────┐
+│ HEADER: Logo ←→ [Search] [Buscar] [Versus]          │
+├─────────────────────────────────────────────────────┤
+│ PLAYER CARD: Avatar + Name + Stats                  │
+├────────────┬────────────┬────────────┬──────────────┤
+│    KPI 1   │    KPI 2   │    KPI 3   │    KPI 4     │
+│   (1fr)    │   (1fr)    │   (1fr)    │    (1fr)     │
+├────────────┴────┬───────┴────────────┴──────────────┤
+│   Pentagrama    │     Análisis de Habilidades       │
+│     (1fr)       │            (2fr)                  │
+├─────────────────┴───────────────────┬───────────────┤
+│     Análisis de Supervivencia       │  Posiciones   │
+│              (2fr)                  │    (1fr)      │
+├─────────────────────────────────────┴───────────────┤
+│              Progreso Histórico (full)              │
+├─────────────────────────────────────────────────────┤
+│ FOOTER: FN Stats Pro [BETA] • Online • Visitas • Don│
+└─────────────────────────────────────────────────────┘
+```
 
-## 3. Componentes UX (Micro-Interacciones)
-
-### Bento Grid
-El dashboard no es una lista, es un **Grid Asimétrico**.
-*   **Mobiliario:** Elementos grandes (Avatar) conviven con bloques compactos (Stats).
-*   **Responsividad:** En móvil no se encogen simplemente; se re-apilan manteniendo su jerarquía de "aire".
-
-### Efectos de Cristal ("Frosted Glass")
-No usamos bordes sólidos gruesos. Usamos "borders" de 1px con `opacity-5` o `10`.
-*   La separación se logra por contraste de "Blur" (`backdrop-filter: blur(20px)`), no por líneas.
-
-## 4. Guía de Usuario (Navegación)
-1.  **Home (The Gate):** Minimalista. Solo el input importa. Transmite "Exclusividad".
-2.  **Transition:** Al buscar, el input no desaparece, *se transforma* (morph) hacia el header.
-3.  **Dashboard (The Cockpit):** Toda la información de un vistazo. Sin scroll innecesario en escritorio.
+## Layout (Home)
+- Centrado vertical y horizontal
+- Search box: 360px max-width
+- Info de estado en esquina inferior derecha (Online + BETA)
+- Sin footer global (solo en Dashboard)

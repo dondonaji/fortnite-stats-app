@@ -2,30 +2,20 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import { Trophy, Target, Shield, Clock, TrendingUp, Search } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { Trophy, Target, Percent, Gamepad2, Crosshair, Skull, Timer, Search, Zap, Crown } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FortnitePlayer } from '@/types';
+import { theme } from '@/lib/theme';
 
-// Components
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 import { SkillRadar } from '@/components/SkillRadar';
 import { SurvivalChart } from '@/components/SurvivalChart';
 import { ProgressChart } from '@/components/ProgressChart';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-function formatMinutes(minutes: number) {
-    if (!minutes) return '0H';
-    const days = Math.floor(minutes / 1440);
-    const hours = Math.floor((minutes % 1440) / 60);
-    if (days > 0) return `${days}D ${hours}H`;
-    return `${hours}H ${(minutes % 60)}M`;
-}
 
 interface PlayerDashboardProps {
     username: string;
@@ -33,180 +23,246 @@ interface PlayerDashboardProps {
 
 export function PlayerDashboard({ username }: PlayerDashboardProps) {
     const router = useRouter();
+    const [searchQuery, setSearchQuery] = useState('');
 
-    const { data: response, error, isLoading } = useSWR(
-        `/api/stats?name=${username}`,
+    const { data: response, isLoading } = useSWR(
+        `/api/stats?name=${encodeURIComponent(username)}`,
         fetcher,
         { revalidateOnFocus: false }
     );
 
     const data = response?.data as FortnitePlayer | undefined;
-    const apiError = response?.error || error;
 
-    const handleLogout = () => {
-        localStorage.removeItem('FN_USER');
-        router.push('/');
+    const handleSearch = () => {
+        if (searchQuery.trim()) {
+            localStorage.setItem('FN_USER', searchQuery);
+            router.push(`/player/${encodeURIComponent(searchQuery)}`);
+        }
     };
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="w-full space-y-8"
-        >
-            {/* Header / Nav */}
-            <header className="flex justify-between items-center py-4">
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="bg-primary text-primary-foreground w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl shadow-[0_0_15px_rgba(191,90,242,0.5)]">
-                        FN
+    if (isLoading) {
+        return (
+            <div className="max-w-6xl mx-auto px-4 py-8">
+                <div className="animate-pulse space-y-6">
+                    <div className="h-16 bg-zinc-800 rounded-lg" />
+                    <div className="h-40 bg-zinc-800 rounded-lg" />
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-zinc-800 rounded-lg" />)}
                     </div>
-                    <h1 className="text-2xl text-white group-hover:text-primary transition-colors">
-                        STATS PRO
-                    </h1>
+                </div>
+            </div>
+        );
+    }
+
+    if (!data) {
+        return (
+            <div className="max-w-md mx-auto px-4 py-20 text-center">
+                <div className="text-6xl mb-4">😢</div>
+                <h2 className="text-2xl font-bold mb-2">Jugador No Encontrado</h2>
+                <p className="text-zinc-400 mb-6">No pudimos encontrar "{username}"</p>
+                <Button onClick={() => router.push('/')}>Volver al Inicio</Button>
+            </div>
+        );
+    }
+
+    const stats = data.stats.all.overall;
+    const initials = data.account.name?.slice(0, 2).toUpperCase() || 'FN';
+    const killsPerMatch = stats.matches > 0 ? (stats.kills / stats.matches).toFixed(1) : '0';
+    const avgSurvivalMins = stats.matches > 0 ? Math.round(stats.minutesPlayed / stats.matches) : 0;
+    const hours = stats.minutesPlayed ? Math.round(stats.minutesPlayed / 60) : 0;
+
+    // Border radius constants - gaming aesthetic
+    const R = { card: 10, inner: 6, badge: 4 };
+
+    return (
+        <div className="max-w-6xl mx-auto px-4 py-6 pb-20">
+
+            {/* HEADER */}
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <Link href="/" onClick={() => localStorage.removeItem('FN_USER')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 6, background: 'linear-gradient(135deg, #7c3aed, #4c1d95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Zap size={16} style={{ color: 'white' }} />
+                    </div>
+                    <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em' }}>FN Stats Pro</span>
                 </Link>
-                <button
-                    onClick={handleLogout}
-                    className="text-xs font-bold text-destructive hover:bg-destructive/10 px-4 py-2 rounded-full transition-colors border border-destructive/20"
-                >
-                    CHANGE PLAYER
-                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ position: 'relative' }}>
+                        <Search style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', width: 13, height: 13, color: '#52525b', pointerEvents: 'none' }} />
+                        <Input
+                            placeholder="Buscar jugador..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            style={{ paddingLeft: 30, width: 160, height: 32, fontSize: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: R.inner }}
+                        />
+                    </div>
+                    <Button onClick={handleSearch} size="sm" style={{ height: 32, fontSize: 12, borderRadius: R.inner }}>Buscar</Button>
+                    <Button
+                        size="sm"
+                        disabled
+                        style={{ height: 32, fontSize: 12, borderRadius: R.inner, opacity: 0.5, cursor: 'not-allowed' }}
+                        title="Próximamente"
+                    >
+                        Versus
+                    </Button>
+                </div>
             </header>
 
-            {/* ERROR STATE */}
-            {apiError && !isLoading && (
-                <Card className="gaming-card border-red-500/50 bg-red-950/20">
-                    <CardContent className="flex flex-col items-center justify-center p-12 text-center space-y-4">
-                        <h2 className="text-3xl text-red-500">Player Not Found</h2>
-                        <p className="text-muted-foreground">Could not find stats for "{username}". Check the spelling or privacy settings.</p>
-                        <button onClick={handleLogout} className="bg-white text-black font-bold px-8 py-3 rounded-full hover:scale-105 transition-transform uppercase">
-                            Try Again
-                        </button>
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* LOADING STATE - SKELETONS */}
-            {isLoading && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <div className="lg:col-span-4 space-y-6">
-                        <Skeleton className="h-[400px] w-full rounded-3xl bg-white/5" />
-                        <div className="grid grid-cols-2 gap-4">
-                            <Skeleton className="h-24 w-full rounded-xl bg-white/5" />
-                            <Skeleton className="h-24 w-full rounded-xl bg-white/5" />
+            {/* PLAYER CARD - HERO SIZE */}
+            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: R.card, padding: '2rem 2.5rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    {/* Avatar - Hero Size */}
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div style={{ width: 100, height: 100, borderRadius: 16, background: 'linear-gradient(135deg, #7c3aed, #4c1d95)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, fontWeight: 700, color: 'white' }}>
+                            {initials}
+                        </div>
+                        <div style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: '#eab308', color: 'black', fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: R.badge, whiteSpace: 'nowrap' }}>
+                            LVL {data.battlePass.level}
                         </div>
                     </div>
-                    <div className="lg:col-span-8 space-y-6">
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full rounded-2xl bg-white/5" />)}
+
+                    {/* Name & Stats */}
+                    <div style={{ flex: 1 }}>
+                        <h1 style={{ fontSize: 36, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>{data.account.name}</h1>
+                        <div style={{ display: 'flex', gap: '2.5rem', marginTop: '1rem' }}>
+                            <StatPill icon={Timer} label="Tiempo Jugado" value={`${hours.toLocaleString()}h`} />
+                            <StatPill icon={Gamepad2} label="Partidas" value={stats.matches.toLocaleString()} />
+                            <StatPill icon={Crown} label="Pase de Batalla" value={`Nivel ${data.battlePass.level}`} />
                         </div>
-                        <Skeleton className="h-[300px] w-full rounded-3xl bg-white/5" />
                     </div>
                 </div>
-            )}
+            </div>
 
-            {/* DATA STATE - THE DASHBOARD */}
-            {data && !isLoading && !apiError && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* KPIs - 4 columnas */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.875rem', marginBottom: '1.25rem' }}>
+                <KpiCard icon={Trophy} label="Victorias" value={stats.wins} iconColor="#facc15" r={R} />
+                <KpiCard icon={Gamepad2} label="Partidas" value={stats.matches} iconColor="#3b82f6" r={R} />
+                <KpiCard icon={Target} label="K/D Ratio" value={stats.kd.toFixed(2)} iconColor="#ef4444" r={R} />
+                <KpiCard icon={Percent} label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} iconColor="#22c55e" r={R} />
+            </div>
 
-                    {/* LEFT COLUMN: HERO PROFILE */}
-                    <div className="lg:col-span-4 flex flex-col gap-6">
-                        <Card className="gaming-card relative overflow-hidden h-full border-primary/20">
-                            <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-80" />
-
-                            <CardContent className="flex flex-col items-center p-8 h-full">
-                                {/* Avatar */}
-                                <div className="relative mb-6">
-                                    <div className="w-40 h-40 rounded-full bg-black border-4 border-primary shadow-[0_0_40px_rgba(191,90,242,0.4)] flex items-center justify-center overflow-hidden">
-                                        <span className="text-6xl font-black text-white">
-                                            {data.account.name.slice(0, 2).toUpperCase()}
-                                        </span>
-                                    </div>
-                                    <Badge className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-primary text-black font-black text-xs px-3 py-1 border-2 border-black">
-                                        LVL {data.battlePass.level}
-                                    </Badge>
-                                </div>
-
-                                <h2 className="text-4xl text-center mb-8 break-all leading-none">{data.account.name}</h2>
-
-                                <Separator className="bg-white/10 mb-8" />
-
-                                <div className="grid grid-cols-2 gap-4 w-full mt-auto">
-                                    <div className="bg-white/5 rounded-xl p-4 text-center border border-white/5">
-                                        <div className="text-muted-foreground text-[10px] font-bold uppercase mb-1">Time Played</div>
-                                        <div className="text-lg font-bold">{formatMinutes(data.stats.all.overall.minutesPlayed)}</div>
-                                    </div>
-                                    <div className="bg-white/5 rounded-xl p-4 text-center border border-white/5">
-                                        <div className="text-muted-foreground text-[10px] font-bold uppercase mb-1">Matches</div>
-                                        <div className="text-lg font-bold">{data.stats.all.overall.matches}</div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* RIGHT COLUMN: DATA GRID */}
-                    <div className="lg:col-span-8 flex flex-col gap-6">
-
-                        {/* KPI GRID */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[
-                                { label: 'WINS', value: data.stats.all.overall.wins, icon: Trophy, color: 'text-yellow-400', glow: 'shadow-yellow-400/20' },
-                                { label: 'K/D', value: data.stats.all.overall.kd.toFixed(2), icon: Target, color: 'text-red-500', glow: 'shadow-red-500/20' },
-                                { label: 'WIN %', value: `${data.stats.all.overall.winRate.toFixed(1)}%`, icon: TrendingUp, color: 'text-green-400', glow: 'shadow-green-400/20' },
-                                { label: 'KILLS', value: data.stats.all.overall.kills, icon: Shield, color: 'text-blue-400', glow: 'shadow-blue-400/20' }
-                            ].map((stat, i) => (
-                                <Card key={i} className={`gaming-card border-l-4 border-l-${stat.color.split('-')[1]}-500 group overflow-hidden`}>
-                                    <CardContent className="p-5 flex flex-col items-center justify-center relative z-10">
-                                        <stat.icon size={24} className={`${stat.color} mb-2 opacity-80 group-hover:scale-110 transition-transform`} />
-                                        <div className="text-3xl md:text-4xl font-black tracking-tighter">{stat.value}</div>
-                                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{stat.label}</div>
-                                    </CardContent>
-                                    <div className={`absolute inset-0 bg-gradient-to-br from-${stat.color.split('-')[1]}-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
-                                </Card>
-                            ))}
-                        </div>
-
-                        {/* CHARTS CONTAINER */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-                            {/* RADAR */}
-                            <Card className="gaming-card flex flex-col">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm text-muted-foreground">SKILL RADAR</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex-1 min-h-[250px] flex items-center justify-center">
-                                    <div className="w-full h-full max-h-[300px]">
-                                        <SkillRadar stats={data.stats.all.overall} />
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* TRENDS */}
-                            <div className="flex flex-col gap-6">
-                                <Card className="gaming-card flex-1">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500" /> SURVIVAL
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="h-[150px]">
-                                        <SurvivalChart stats={data.stats.all.overall} />
-                                    </CardContent>
-                                </Card>
-                                <Card className="gaming-card flex-1">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-green-500" /> PROGRESS
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="h-[150px]">
-                                        <ProgressChart history={data.history || []} />
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </div>
-
+            {/* PENTAGRAMA + ANÁLISIS */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: R.card, padding: '1rem' }}>
+                    <h3 style={{ fontSize: 10, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.875rem' }}>Pentagrama</h3>
+                    <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <SkillRadar stats={stats} />
                     </div>
                 </div>
-            )}
-        </motion.div>
+                <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: R.card, padding: '1rem' }}>
+                    <h3 style={{ fontSize: 10, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.875rem' }}>Análisis de Habilidades</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                        <StatBox icon={Crosshair} label="Kills/Partida" value={killsPerMatch} r={R} />
+                        <StatBox icon={Timer} label="Supervivencia" value={`${avgSurvivalMins}m`} r={R} />
+                        <StatBox icon={Trophy} label="Ratio Victoria" value={`1:${stats.wins > 0 ? Math.round(stats.matches / stats.wins) : '∞'}`} r={R} />
+                        <StatBox icon={Skull} label="Total Kills" value={stats.kills.toLocaleString()} r={R} />
+                    </div>
+                </div>
+            </div>
+
+            {/* SUPERVIVENCIA + POSICIONES */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: R.card, padding: '1rem' }}>
+                    <h3 style={{ fontSize: 10, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.875rem' }}>Análisis de Supervivencia</h3>
+                    <div style={{ height: 180 }}>
+                        <SurvivalChart stats={stats} />
+                    </div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: R.card, padding: '1rem' }}>
+                    <h3 style={{ fontSize: 10, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.875rem' }}>Posiciones</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                        <ProgressRow label="Top 25" value={stats.top25 || 0} total={stats.matches} color="#3b82f6" />
+                        <ProgressRow label="Top 10" value={stats.top10 || 0} total={stats.matches} color="#8b5cf6" />
+                        <ProgressRow label="Top 5" value={stats.top5 || 0} total={stats.matches} color="#f97316" />
+                        <ProgressRow label="Top 3" value={stats.top3 || 0} total={stats.matches} color="#eab308" />
+                        <ProgressRow label="Wins" value={stats.wins} total={stats.matches} color="#22c55e" />
+                    </div>
+                </div>
+            </div>
+
+            {/* HISTÓRICO */}
+            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: R.card, padding: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.875rem' }}>
+                    <h3 style={{ fontSize: 10, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Progreso Histórico</h3>
+                    <span style={{ fontSize: 11, color: '#52525b' }}>Últimos 30 días</span>
+                </div>
+                <div style={{ height: 140 }}>
+                    <ProgressChart history={data.history || []} />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUB-COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function StatPill({ icon: Icon, label, value, subtitle }: { icon: any; label: string; value: string; subtitle?: string }) {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Icon size={11} style={{ color: '#71717a' }} />
+                <span style={{ fontSize: 10, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
+            </div>
+            <span style={{ fontSize: 18, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>{value}</span>
+            {subtitle && <span style={{ fontSize: 9, color: '#52525b' }}>{subtitle}</span>}
+        </div>
+    );
+}
+
+function KpiCard({ icon: Icon, label, value, iconColor, r }: { icon: any; label: string; value: string | number; iconColor: string; r: { card: number; inner: number } }) {
+    return (
+        <div
+            style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: r.card,
+                padding: '0.875rem',
+                textAlign: 'center',
+                transition: 'all 0.2s ease',
+                cursor: 'default'
+            }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.borderColor = 'rgba(124,58,237,0.4)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(124,58,237,0.15)';
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                e.currentTarget.style.boxShadow = 'none';
+            }}
+        >
+            <Icon size={18} style={{ color: iconColor, opacity: 0.85, marginBottom: 6 }} />
+            <div style={{ fontSize: 24, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{value}</div>
+            <div style={{ fontSize: 9, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 3 }}>{label}</div>
+        </div>
+    );
+}
+
+function StatBox({ icon: Icon, label, value, r }: { icon: any; label: string; value: string; r: { inner: number } }) {
+    return (
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: r.inner, padding: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+                <Icon size={11} style={{ color: '#a855f7' }} />
+                <span style={{ fontSize: 9, fontWeight: 500, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{value}</div>
+        </div>
+    );
+}
+
+function ProgressRow({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
+    const pct = total > 0 ? (value / total) * 100 : 0;
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 500, color: '#71717a', width: 44 }}>{label}</span>
+            <div style={{ flex: 1, height: 5, background: 'rgba(255,255,255,0.08)', borderRadius: 999 }}>
+                <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: color, borderRadius: 999 }} />
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 600, fontVariantNumeric: 'tabular-nums', width: 32, textAlign: 'right' }}>{value}</span>
+        </div>
     );
 }
