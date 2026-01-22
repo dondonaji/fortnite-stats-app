@@ -16,9 +16,8 @@ const config: Config = {
         },
         extend: {
             fontFamily: {
-                sans: ['var(--font-inter)', 'sans-serif'],
-                // Optional: keep a display font alias if we want specific tuning
-                display: ['var(--font-inter)', 'sans-serif'],
+                sans: ['var(--font-geist)', 'sans-serif'],
+                display: ['var(--font-geist)', 'sans-serif'],
             },
             colors: {
                 border: "hsl(var(--border))",
